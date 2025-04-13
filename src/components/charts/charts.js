@@ -1,7 +1,7 @@
 import React from "react"
 import Image from "next/image"
 import { useAppContext } from "@/context/AppContext"
-import RGL, { WidthProvider } from "react-grid-layout"
+import { Responsive, WidthProvider } from "react-grid-layout"
 
 import "react-grid-layout/css/styles.css"
 import "react-resizable/css/styles.css"
@@ -13,7 +13,7 @@ import { BarChartMultiple } from "./bar-chart"
 import { LineChart } from "./line-chart"
 import { PieChartMultiple } from "./pie-chart"
 
-const ReactGridLayout = WidthProvider(RGL)
+const ResponsiveGridLayout = WidthProvider(Responsive)
 
 /**
  * @typedef {Object} ChartItem
@@ -57,16 +57,19 @@ const initialCharts = [
 
 class Blocks extends React.Component {
   render() {
-    const { blocks, removeBlock, updateLayout } = this.props
+    const { blocks, removeBlock } = this.props
 
     function handleClick(id) {
       removeBlock(id)
     }
 
     return (
-      <ReactGridLayout
+      <ResponsiveGridLayout
         className="layout"
-        cols={12}
+        autoSize={true}
+        verticalCompact={true}
+        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+        cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
         rowHeight={30}
         width={1200}
         draggableHandle=".dragMe"
@@ -81,7 +84,7 @@ class Blocks extends React.Component {
                       src={block.imageUrl}
                       alt={block.heading}
                       fill
-                      className="h-full w-full rounded-lg object-cover"
+                      className="h-full w-full rounded-lg !object-cover"
                     />
                   </Card>
                   <button
@@ -94,18 +97,20 @@ class Blocks extends React.Component {
               ) : (
                 <div className="group relative h-full">
                   <>{block.graph}</>
-                  <button
-                    onClick={() => handleClick(block.key)}
-                    className="absolute right-2 top-2  z-50 rounded-full border border-[#ffffffe0] !bg-gray-100 p-4 transition-opacity duration-200 group-hover:block"
-                  >
-                    <Trash className="h-4 w-4 text-red-500" />
-                  </button>
+                  {block.static ? null : (
+                    <button
+                      onClick={() => handleClick(block.key)}
+                      className="absolute right-2 top-2  z-50 rounded-full border border-[#ffffffe0] !bg-gray-100 p-4 transition-opacity duration-200 group-hover:block"
+                    >
+                      <Trash className="h-4 w-4 text-red-500" />
+                    </button>
+                  )}
                 </div>
               )}
             </div>
           </div>
         ))}
-      </ReactGridLayout>
+      </ResponsiveGridLayout>
     )
   }
 }
