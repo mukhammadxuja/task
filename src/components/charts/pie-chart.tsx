@@ -1,8 +1,6 @@
 "use client"
 
 import React from "react"
-import { useAppContext } from "@/context/AppContext"
-import { Trash } from "lucide-react"
 import { Label, Pie, PieChart } from "recharts"
 
 import {
@@ -47,20 +45,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function PieChartMultiple({
-  id,
-  width,
-  height,
-}: {
-  id?: string
-  width?: number
-  height?: number
-}) {
-  const { removeBlock } = useAppContext()
-
-  const handleDelete = (id: string) => {
-    removeBlock(id)
-  }
+export function PieChartMultiple() {
   const totalVisitors = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + curr.visitors, 0)
   }, [])
@@ -116,13 +101,6 @@ export function PieChartMultiple({
           </PieChart>
         </ChartContainer>
       </CardContent>
-
-      <button
-        onClick={() => handleDelete(id ?? "")}
-        className="absolute right-2 top-2 hidden rounded-full border border-[#ffffffe0] bg-gray-50 p-2 transition-opacity duration-200 group-hover:block"
-      >
-        <Trash className="h-5 w-5 text-red-500" />
-      </button>
     </Card>
   )
 }

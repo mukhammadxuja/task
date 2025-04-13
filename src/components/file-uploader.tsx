@@ -5,7 +5,12 @@ import { Download, ImageIcon, ImagePlus, Upload, X } from "lucide-react"
 
 import { Button } from "./ui/button"
 
-export default function FileUploader() {
+type Props = {
+  addBlock: (type: "image", imageUrl: string) => void
+  setOpen: (open: boolean) => void
+}
+
+export default function FileUploader({ addBlock, setOpen }: Props) {
   const [file, setFile] = useState<File | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -26,7 +31,10 @@ export default function FileUploader() {
 
   const handleUpload = () => {
     if (file) {
-      alert(`Fayl yuklandi: ${file.name}`)
+      const imageUrl = URL.createObjectURL(file)
+      addBlock("image", imageUrl)
+      setFile(null)
+      setOpen(false)
     }
   }
 

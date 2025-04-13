@@ -7,38 +7,32 @@ import {
   useEffect,
   useState,
 } from "react"
+import { toast } from "sonner"
 
 import { BarChartMultiple } from "@/components/charts/bar-chart"
 import { LineChart } from "@/components/charts/line-chart"
 import { PieChartMultiple } from "@/components/charts/pie-chart"
 
-interface Block {
-  id: string
-  type: string
-  x: number
-  y: number
-  w: number
-  h: number
-}
-
-type ChartType = "bar" | "line" | "pie"
-
-type ChartItem = {
+interface BlockItem {
   key: string
-  type: ChartType
-  dataGrid: { x: number; y: number; w: number; h: number }
-  graph: JSX.Element
+  type: BlockType
+  dataGrid: {
+    x: number
+    y: number
+    w: number
+    h: number
+  }
+  graph?: JSX.Element
+  imageUrl?: string
   heading: string
 }
 
+type BlockType = "bar" | "line" | "pie" | "image"
+
 interface AppContextType {
-  blocks: Block[]
-  charts: ChartItem[]
-  addBlock: ({ type, w, h }: { type: string; w: number; h: number }) => void
-  updateBlock: (id: string, updates: Partial<Block>) => void
-  removeBlock: (id: string) => void
-  addChart: (type: ChartType) => void
-  removeChart: (key: string) => void
+  blocks: BlockItem[]
+  addBlock: (type: BlockType, imageUrl?: string) => void
+  removeBlock: (key: string) => void
   updateLayout: (
     newLayout: { i: string; x: number; y: number; w: number; h: number }[]
   ) => void
@@ -55,70 +49,78 @@ export const useAppContext = (): AppContextType => {
 }
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
-  const [charts, setCharts] = useState<ChartItem[]>([])
-  const [blocks, setBlocks] = useState<Block[]>([])
+  const [blocks, setBlocks] = useState<BlockItem[]>([])
 
   useEffect(() => {
-    const saved = localStorage.getItem("charts")
-    if (saved) setCharts(JSON.parse(saved))
+    try {
+      const saved = localStorage.getItem("blocks")
+      if (saved) setBlocks(JSON.parse(saved))
+    } catch (error) {
+      console.error("Failed to load from localStorage", error)
+    }
   }, [])
 
   useEffect(() => {
-    localStorage.setItem("charts", JSON.stringify(charts))
-  }, [charts])
+    localStorage.setItem("blocks", JSON.stringify(blocks))
+  }, [blocks])
 
-  const addChart = (type: ChartType) => {
+  const addBlock = (type: BlockType, imageUrl?: string) => {
     const id = Date.now().toString()
-
-    const lastChart = charts[charts.length - 1]
-    const nextX = lastChart?.dataGrid?.x + lastChart?.dataGrid?.w || 0
-
+    const last = blocks[blocks.length - 1]
+    const nextX = last?.dataGrid.x + last?.dataGrid.w || 0
     const x = nextX + 3 > 12 ? 0 : nextX
-    const y =
-      nextX + 3 > 12
-        ? (lastChart?.dataGrid?.y || 0) + lastChart?.dataGrid?.h
-        : 0
+    const y = nextX + 3 > 12 ? (last?.dataGrid.y || 0) + last?.dataGrid.h : 0
 
-    const chartMap: Record<ChartType, ChartItem> = {
+    const blockMap: Record<BlockType, BlockItem> = {
       bar: {
         key: `bar-${id}`,
         type: "bar",
-        dataGrid: { x, y, w: 3, h: 3 },
+        dataGrid: { x, y, w: 3, h: 4 },
         graph: <BarChartMultiple />,
         heading: "Bar Chart",
       },
       line: {
         key: `line-${id}`,
         type: "line",
-        dataGrid: { x, y, w: 3, h: 3 },
+        dataGrid: { x, y, w: 3, h: 4 },
         graph: <LineChart />,
         heading: "Line Chart",
       },
       pie: {
         key: `pie-${id}`,
         type: "pie",
-        dataGrid: { x, y, w: 3, h: 3 },
+        dataGrid: { x, y, w: 3, h: 4 },
         graph: <PieChartMultiple />,
         heading: "Pie Chart",
       },
+      image: {
+        key: `image-${id}`,
+        type: "image",
+        dataGrid: { x, y, w: 3, h: 4 },
+        imageUrl: imageUrl || "https://via.placeholder.com/300",
+        heading: "Image Block",
+      },
     }
 
-    setCharts((prev) => [...prev, chartMap[type]])
+    setBlocks((prev) => [...prev, blockMap[type]])
+
+    toast("Block added successfully")
   }
 
-  const removeChart = (key: string) => {
-    setCharts((prev) => prev.filter((c) => c.key !== key))
+  const removeBlock = (key: string) => {
+    console.log("Removing", key)
+    setBlocks((prev) => prev.filter((c) => c.key !== key))
   }
 
   const updateLayout = (
     newLayout: { i: string; x: number; y: number; w: number; h: number }[]
   ) => {
-    setCharts((prev) =>
-      prev.map((chart) => {
-        const layoutItem = newLayout.find((l) => l.i === chart.key)
+    setBlocks((prev) =>
+      prev.map((block) => {
+        const layoutItem = newLayout.find((l) => l.i === block.key)
         return layoutItem
           ? {
-              ...chart,
+              ...block,
               dataGrid: {
                 x: layoutItem.x,
                 y: layoutItem.y,
@@ -126,42 +128,17 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
                 h: layoutItem.h,
               },
             }
-          : chart
+          : block
       })
     )
-  }
-  const addBlock = ({ type, w, h }: { type: string; w: number; h: number }) => {
-    const newBlock: Block = {
-      id: crypto.randomUUID(),
-      type,
-      x: 0,
-      y: 0,
-      w,
-      h,
-    }
-    setBlocks((prev) => [...prev, newBlock])
-  }
-
-  const updateBlock = (id: string, updates: Partial<Block>) => {
-    setBlocks((prev) =>
-      prev.map((block) => (block.id === id ? { ...block, ...updates } : block))
-    )
-  }
-
-  const removeBlock = (id: string) => {
-    setBlocks((prev) => prev.filter((block) => block.id !== id))
   }
 
   return (
     <AppContext.Provider
       value={{
         blocks,
-        charts,
         addBlock,
-        updateBlock,
         removeBlock,
-        addChart,
-        removeChart,
         updateLayout,
       }}
     >
@@ -169,3 +146,5 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     </AppContext.Provider>
   )
 }
+
+export default AppContext

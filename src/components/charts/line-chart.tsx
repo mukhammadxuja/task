@@ -1,7 +1,5 @@
 "use client"
 
-import { useAppContext } from "@/context/AppContext"
-import { Trash } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 
 import { Card, CardContent } from "@/components/ui/card"
@@ -32,12 +30,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function LineChart({ id }: { id?: string }) {
-  const { removeBlock } = useAppContext()
-
-  const handleDelete = (id: string) => {
-    removeBlock(id)
-  }
+export function LineChart() {
   return (
     <Card className="dragMe group relative h-full w-full cursor-grab rounded-lg bg-gray-50 p-2 duration-300 hover:bg-gray-100 active:cursor-grabbing">
       <CardContent className="h-full bg-white">
@@ -77,13 +70,6 @@ export function LineChart({ id }: { id?: string }) {
           </AreaChart>
         </ChartContainer>
       </CardContent>
-
-      <button
-        onClick={() => handleDelete(id ?? "")}
-        className="absolute right-2 top-2 hidden rounded-full border border-[#ffffffe0] bg-gray-50 p-2 transition-opacity duration-200 group-hover:block"
-      >
-        <Trash className="h-5 w-5 text-red-500" />
-      </button>
     </Card>
   )
 }

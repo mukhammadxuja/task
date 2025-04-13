@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import Image from "next/image"
 import { Laptop, Smartphone } from "lucide-react"
+import Image from "next/image"
+import { useState } from "react"
 
 import { Button } from "./ui/button"
 
@@ -15,7 +15,8 @@ function FloatingNav({ setOpenImageUpload, setOpenCharts }: FloatingNavProps) {
   const [desktop, setDesktop] = useState(true)
 
   return (
-    <div className="shadow-fancy fixed bottom-[2.5rem] left-1/2 z-[999] flex -translate-x-1/2 items-center gap-3 rounded-[16px] border border-[#ffffffe0] bg-white bg-opacity-60 px-[.75rem] py-1.5 backdrop-blur">
+    <div className="fixed bottom-[2.5rem] left-1/2 z-[999] flex -translate-x-1/2 items-center gap-3 rounded-[16px] border border-[#ffffffe0] bg-white bg-opacity-60 px-[.75rem] py-1.5 shadow-fancy backdrop-blur">
+
       <div className="flex items-center gap-2">
         <Button
           title="Image & Video"
@@ -72,6 +73,13 @@ function FloatingNav({ setOpenImageUpload, setOpenCharts }: FloatingNavProps) {
           <Smartphone className="h-6 w-6" />
         </Button>
       </div>
+
+      <div className="h-6 w-[1.5px] bg-gray-300" />
+      
+      <Button title="Save last changes" size="sm" className="!py-2 !text-xs !bg-indigo-500">
+        Save last changes
+      </Button>
+
     </div>
   )
 }

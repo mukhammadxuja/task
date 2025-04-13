@@ -1,7 +1,6 @@
 "use client"
 
 import { useAppContext } from "@/context/AppContext"
-import { Trash } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 
 import {
@@ -33,7 +32,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function BarChartMultiple({ id }: { id?: string }) {
+export function BarChartMultiple() {
   const { removeBlock } = useAppContext()
 
   const handleDelete = (id: string) => {
@@ -72,13 +71,6 @@ export function BarChartMultiple({ id }: { id?: string }) {
           </BarChart>
         </ChartContainer>
       </CardContent>
-
-      <button
-        onClick={() => handleDelete(id ?? "")}
-        className="absolute right-2 top-2 hidden rounded-full border border-[#ffffffe0] bg-gray-50 p-2 transition-opacity duration-200 group-hover:block"
-      >
-        <Trash className="h-5 w-5 text-red-500" />
-      </button>
     </Card>
   )
 }

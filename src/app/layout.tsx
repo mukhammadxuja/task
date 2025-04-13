@@ -6,6 +6,7 @@ import { AppContextProvider } from "@/context/AppContext"
 
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
+import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -82,6 +83,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             disableTransitionOnChange
           >
             {children}
+            <Toaster />
           </ThemeProvider>
         </AppContextProvider>
       </body>
