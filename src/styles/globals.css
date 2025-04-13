@@ -86,3 +86,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+.react-grid-placeholder {
+  background: #a8c0f0 !important;
+  border: 2px dashed #2662d9;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+}

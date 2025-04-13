@@ -3,16 +3,15 @@ import { useAppContext } from "@/context/AppContext"
 
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 
+type ChartItem = "bar" | "pie" | "line"
+
 interface AddChartsDialogProps {
   isOpen: boolean
   setOpen: (value: boolean) => void
 }
 
 function AddChartsDialog({ isOpen, setOpen }: AddChartsDialogProps) {
-  const { addBlock } = useAppContext()
-  const handleChartClick = (type: string, w: number, h: number) => {
-    addBlock({ type, w, h })
-  }
+  const { addChart } = useAppContext()
 
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
@@ -20,7 +19,7 @@ function AddChartsDialog({ isOpen, setOpen }: AddChartsDialogProps) {
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <div
-              onClick={() => handleChartClick("bar", 308, 180)}
+              onClick={() => addChart("bar")}
               className="w-full cursor-pointer"
             >
               <Image
@@ -33,7 +32,7 @@ function AddChartsDialog({ isOpen, setOpen }: AddChartsDialogProps) {
               <span className="!mt-3 ml-1 text-sm font-medium">Bar chart</span>
             </div>
             <div
-              onClick={() => handleChartClick("pie", 308, 150)}
+              onClick={() => addChart("pie")}
               className="w-full cursor-pointer"
             >
               <Image
@@ -47,7 +46,7 @@ function AddChartsDialog({ isOpen, setOpen }: AddChartsDialogProps) {
             </div>
           </div>
           <div
-            onClick={() => handleChartClick("line", 308, 200)}
+            onClick={() => addChart("line")}
             className="col-span-2 cursor-pointer"
           >
             <Image

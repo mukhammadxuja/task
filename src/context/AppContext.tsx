@@ -7,7 +7,6 @@ import {
   useEffect,
   useState,
 } from "react"
-import { v4 as uuidv4 } from "uuid"
 
 interface Block {
   id: string
@@ -18,14 +17,32 @@ interface Block {
   h: number
 }
 
+type ChartType = "bar" | "line" | "pie"
+
+interface ChartItem {
+  key: string
+  type: ChartType
+  dataGrid: {
+    x: number
+    y: number
+    w: number
+    h: number
+  }
+  heading: string
+  graph: React.ReactNode
+}
+
 interface AppContextType {
   blocks: Block[]
+  charts: ChartItem[]
   addBlock: ({ type, w, h }: { type: string; w: number; h: number }) => void
   updateBlock: (id: string, updates: Partial<Block>) => void
   removeBlock: (id: string) => void
+  addChart: (chart: ChartItem) => void
+  removeChart: (key: string) => void
+  updateLayout: (newLayout: { i: string; x: number; y: number; w: number; h: number }[]) => void
 }
 
-// default context value
 const AppContext = createContext<AppContextType | undefined>(undefined)
 
 export const useAppContext = (): AppContextType => {
@@ -37,74 +54,79 @@ export const useAppContext = (): AppContextType => {
 }
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
-  const [blocks, setBlocks] = useState<Block[]>(() => {
-    const stored = localStorage.getItem("blocks")
-    return stored ? JSON.parse(stored) : []
-  })
+  const [charts, setCharts] = useState<ChartItem[]>([])
+  const [blocks, setBlocks] = useState<Block[]>([])
 
-  console.log(blocks)
+  useEffect(() => {
+    const saved = localStorage.getItem("charts")
+    if (saved) setCharts(JSON.parse(saved))
+  }, [])
 
+  useEffect(() => {
+    localStorage.setItem("charts", JSON.stringify(charts))
+  }, [charts])
+
+  const addChart = (chart: ChartItem) => {
+    setCharts((prev) => [...prev, chart])
+  }
+
+  const removeChart = (key: string) => {
+    setCharts((prev) => prev.filter((c) => c.key !== key))
+  }
+
+  const updateLayout = (newLayout: { i: string; x: number; y: number; w: number; h: number }[]) => {
+    setCharts((prev) =>
+      prev.map((chart) => {
+        const layoutItem = newLayout.find((l) => l.i === chart.key)
+        return layoutItem
+          ? {
+              ...chart,
+              dataGrid: {
+                x: layoutItem.x,
+                y: layoutItem.y,
+                w: layoutItem.w,
+                h: layoutItem.h,
+              },
+            }
+          : chart
+      })
+    )
+  }
   const addBlock = ({ type, w, h }: { type: string; w: number; h: number }) => {
     const newBlock: Block = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       type,
       x: 0,
-      y: Infinity,
-      w: w ?? 0,
-      h: h ?? 0,
+      y: 0,
+      w,
+      h,
     }
-
-    setBlocks((prev) => {
-      const updatedBlocks = [...prev, newBlock]
-      localStorage.setItem("blocks", JSON.stringify(updatedBlocks))
-      return updatedBlocks
-    })
+    setBlocks((prev) => [...prev, newBlock])
   }
 
   const updateBlock = (id: string, updates: Partial<Block>) => {
-    setBlocks((prev) => {
-      const updatedBlocks = prev.map((block) =>
-        block.id === id ? { ...block, ...updates } : block
-      )
-
-      if (updates.w || updates.h) {
-        localStorage.setItem("blocks", JSON.stringify(updatedBlocks))
-      }
-
-      return updatedBlocks
-    })
+    setBlocks((prev) =>
+      prev.map((block) => (block.id === id ? { ...block, ...updates } : block))
+    )
   }
 
   const removeBlock = (id: string) => {
-    setBlocks((prev) => {
-      const updatedBlocks = prev.filter((block) => block.id !== id)
-      localStorage.setItem("blocks", JSON.stringify(updatedBlocks))
-      return updatedBlocks
-    })
+    setBlocks((prev) => prev.filter((block) => block.id !== id))
   }
 
-  useEffect(() => {
-    const handleResize = () => {
-      setBlocks((prev) => {
-        const updatedBlocks = prev.map((block) => {
-          return { ...block }
-        })
-
-        localStorage.setItem("blocks", JSON.stringify(updatedBlocks))
-
-        return updatedBlocks
-      })
-    }
-
-    window.addEventListener("resize", handleResize)
-
-    return () => {
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [])
-
   return (
-    <AppContext.Provider value={{ blocks, addBlock, updateBlock, removeBlock }}>
+    <AppContext.Provider
+      value={{
+        blocks,
+        charts,
+        addBlock,
+        updateBlock,
+        removeBlock,
+        addChart,
+        removeChart,
+        updateLayout,
+      }}
+    >
       {children}
     </AppContext.Provider>
   )

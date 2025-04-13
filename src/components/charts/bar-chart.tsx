@@ -33,22 +33,14 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function BarChartMultiple({
-  id,
-  width,
-  height,
-}: {
-  id: string
-  width?: number
-  height?: number
-}) {
+export function BarChartMultiple({ id }: { id?: string }) {
   const { removeBlock } = useAppContext()
 
   const handleDelete = (id: string) => {
     removeBlock(id)
   }
   return (
-    <Card className="group relative h-full w-full cursor-grab rounded-lg bg-gray-50 p-1.5 duration-300 hover:bg-gray-100 active:cursor-grabbing">
+    <Card className="dragMe group relative h-full w-full cursor-grab rounded-lg bg-gray-50 p-2 duration-300 hover:bg-gray-100 active:cursor-grabbing">
       <CardContent className="h-full bg-white">
         <ChartContainer
           config={chartConfig}
@@ -82,7 +74,7 @@ export function BarChartMultiple({
       </CardContent>
 
       <button
-        onClick={() => handleDelete(id)}
+        onClick={() => handleDelete(id ?? "")}
         className="absolute right-2 top-2 hidden rounded-full border border-[#ffffffe0] bg-gray-50 p-2 transition-opacity duration-200 group-hover:block"
       >
         <Trash className="h-5 w-5 text-red-500" />

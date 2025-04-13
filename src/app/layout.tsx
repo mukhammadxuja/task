@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
-    creator: "@_rdev7",
+    creator: "@akzmsh",
   },
   icons: {
     icon: "/favicon.ico",
@@ -77,7 +77,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <AppContextProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="light"
             enableSystem
             disableTransitionOnChange
           >
