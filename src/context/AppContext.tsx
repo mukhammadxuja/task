@@ -8,6 +8,10 @@ import {
   useState,
 } from "react"
 
+import { BarChartMultiple } from "@/components/charts/bar-chart"
+import { LineChart } from "@/components/charts/line-chart"
+import { PieChartMultiple } from "@/components/charts/pie-chart"
+
 interface Block {
   id: string
   type: string
@@ -19,17 +23,12 @@ interface Block {
 
 type ChartType = "bar" | "line" | "pie"
 
-interface ChartItem {
+type ChartItem = {
   key: string
   type: ChartType
-  dataGrid: {
-    x: number
-    y: number
-    w: number
-    h: number
-  }
+  dataGrid: { x: number; y: number; w: number; h: number }
+  graph: JSX.Element
   heading: string
-  graph: React.ReactNode
 }
 
 interface AppContextType {
@@ -38,9 +37,11 @@ interface AppContextType {
   addBlock: ({ type, w, h }: { type: string; w: number; h: number }) => void
   updateBlock: (id: string, updates: Partial<Block>) => void
   removeBlock: (id: string) => void
-  addChart: (chart: ChartItem) => void
+  addChart: (type: ChartType) => void
   removeChart: (key: string) => void
-  updateLayout: (newLayout: { i: string; x: number; y: number; w: number; h: number }[]) => void
+  updateLayout: (
+    newLayout: { i: string; x: number; y: number; w: number; h: number }[]
+  ) => void
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -66,15 +67,52 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("charts", JSON.stringify(charts))
   }, [charts])
 
-  const addChart = (chart: ChartItem) => {
-    setCharts((prev) => [...prev, chart])
+  const addChart = (type: ChartType) => {
+    const id = Date.now().toString()
+
+    const lastChart = charts[charts.length - 1]
+    const nextX = lastChart?.dataGrid?.x + lastChart?.dataGrid?.w || 0
+
+    const x = nextX + 3 > 12 ? 0 : nextX
+    const y =
+      nextX + 3 > 12
+        ? (lastChart?.dataGrid?.y || 0) + lastChart?.dataGrid?.h
+        : 0
+
+    const chartMap: Record<ChartType, ChartItem> = {
+      bar: {
+        key: `bar-${id}`,
+        type: "bar",
+        dataGrid: { x, y, w: 3, h: 3 },
+        graph: <BarChartMultiple />,
+        heading: "Bar Chart",
+      },
+      line: {
+        key: `line-${id}`,
+        type: "line",
+        dataGrid: { x, y, w: 3, h: 3 },
+        graph: <LineChart />,
+        heading: "Line Chart",
+      },
+      pie: {
+        key: `pie-${id}`,
+        type: "pie",
+        dataGrid: { x, y, w: 3, h: 3 },
+        graph: <PieChartMultiple />,
+        heading: "Pie Chart",
+      },
+    }
+
+    setCharts((prev) => [...prev, chartMap[type]])
   }
 
   const removeChart = (key: string) => {
     setCharts((prev) => prev.filter((c) => c.key !== key))
   }
 
-  const updateLayout = (newLayout: { i: string; x: number; y: number; w: number; h: number }[]) => {
+  const updateLayout = (
+    newLayout: { i: string; x: number; y: number; w: number; h: number }[]
+  ) => {
     setCharts((prev) =>
       prev.map((chart) => {
         const layoutItem = newLayout.find((l) => l.i === chart.key)

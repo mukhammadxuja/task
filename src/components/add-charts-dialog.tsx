@@ -3,8 +3,6 @@ import { useAppContext } from "@/context/AppContext"
 
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 
-type ChartItem = "bar" | "pie" | "line"
-
 interface AddChartsDialogProps {
   isOpen: boolean
   setOpen: (value: boolean) => void
